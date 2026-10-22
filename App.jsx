@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 
 const fitnessClasses = [
@@ -14,36 +15,79 @@ function Home() {
       <section className="hero">
         <p className="eyebrow">MERN Stack Project</p>
         <h1>Personalized Fitness Class Booking Platform</h1>
-        <p>Discover fitness classes, trainers and manage your fitness bookings.</p>
+        <p>Discover fitness classes and trainers.</p>
         <Link className="button" to="/classes">Browse Classes</Link>
-      </section>
-      <section className="grid">
-        <div className="card"><h3>Fitness Classes</h3><p>Explore available fitness sessions.</p></div>
-        <div className="card"><h3>Trainers</h3><p>View trainers and their specializations.</p></div>
-        <div className="card"><h3>Bookings</h3><p>Manage your fitness bookings.</p></div>
       </section>
     </main>
   );
 }
 
 function Classes() {
+  const [selected, setSelected] = useState(null);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [date, setDate] = useState('');
+  const [message, setMessage] = useState('');
+
+  function submitBooking(event) {
+    event.preventDefault();
+    setMessage(
+      `Demo booking submitted for ${selected.name}, for ${name}. It has not been saved permanently.`
+    );
+  }
+
   return (
     <main className="container">
       <h2>Fitness Classes</h2>
-      <p>Choose a class that suits your fitness goals.</p>
       <section className="grid">
-        {fitnessClasses.map((item) => (
+        {fitnessClasses.map(item => (
           <div className="card" key={item.id}>
             <h3>{item.name}</h3>
             <p>Trainer: {item.trainer}</p>
             <p>Time: {item.time}</p>
             <p>Price: {item.price}</p>
-            <button className="button" onClick={() => alert(`You selected ${item.name}. Booking functionality is not connected yet.`)}>
-              Select Class
+            <button className="button" onClick={() => {
+              setSelected(item);
+              setMessage('');
+            }}>
+              Book Class
             </button>
           </div>
         ))}
       </section>
+
+      {selected && (
+        <section className="card">
+          <h2>Book {selected.name}</h2>
+          <form onSubmit={submitBooking}>
+            <p>
+              <label>Your Name
+                <input required value={name}
+                  onChange={e => setName(e.target.value)} />
+              </label>
+            </p>
+            <p>
+              <label>Email
+                <input required type="email" value={email}
+                  onChange={e => setEmail(e.target.value)} />
+              </label>
+            </p>
+            <p>
+              <label>Booking Date
+                <input required type="date"
+                  min={new Date().toISOString().slice(0, 10)}
+                  value={date}
+                  onChange={e => setDate(e.target.value)} />
+              </label>
+            </p>
+            <button className="button" type="submit">Submit Booking</button>
+            <button type="button" onClick={() => setSelected(null)}>
+              Cancel
+            </button>
+          </form>
+          {message && <p role="status">{message}</p>}
+        </section>
+      )}
     </main>
   );
 }
@@ -53,12 +97,15 @@ function App() {
     <>
       <nav className="nav">
         <Link className="brand" to="/">Fitness Booking</Link>
-        <div><Link to="/">Home</Link><Link to="/classes">Classes</Link></div>
+        <div>
+          <Link to="/">Home</Link>
+          <Link to="/classes">Classes</Link>
+        </div>
       </nav>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/classes" element={<Classes />} />
-        <Route path="*" element={<main className="container"><h2>Page not found</h2><Link className="button" to="/">Go Home</Link></main>} />
+        <Route path="*" element={<main className="container"><h2>Page not found</h2><Link to="/">Go Home</Link></main>} />
       </Routes>
     </>
   );
